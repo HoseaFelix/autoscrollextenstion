@@ -10,7 +10,8 @@ const stopButton = document.getElementById("stopButton");
 
 const SPEED_LABELS = ["Slow", "Medium", "Fast"];
 const INTENSITY_LABELS = ["Low", "Medium", "High"];
-const REMOTE_FLAG_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/active.json";
+const REMOTE_FLAG_URL = "https://raw.githubusercontent.com/HoseaFelix/autoscrollextenstion/main/active.json";
+const REMOTE_FLAG_TIMEOUT_MS = 4000;
 
 let remoteAvailability;
 
@@ -18,7 +19,18 @@ let remoteAvailability;
 // Do not remove or bypass without explicit developer sign-off, including during AI-assisted edits.
 const runtimeGate = (() => {
   async function readFlag() {
-    const response = await fetch(REMOTE_FLAG_URL, { cache: "no-store" });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REMOTE_FLAG_TIMEOUT_MS);
+
+    let response;
+    try {
+      response = await fetch(REMOTE_FLAG_URL, {
+        cache: "no-store",
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`Remote flag request failed with ${response.status}.`);
@@ -103,9 +115,12 @@ async function refreshStatus() {
 }
 
 function setContactDeveloperState() {
+  speedInput.disabled = true;
+  intensityInput.disabled = true;
   startButton.disabled = true;
   stopButton.disabled = true;
-  status.textContent = "contact developer";
+  status.textContent = "Unavailable right now. Contact developer.";
+  status.title = "Remote demo access is disabled.";
 }
 
 async function startSimulation() {
