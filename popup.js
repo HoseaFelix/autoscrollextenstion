@@ -10,7 +10,8 @@ const stopButton = document.getElementById("stopButton");
 
 const SPEED_LABELS = ["Slow", "Medium", "Fast"];
 const INTENSITY_LABELS = ["Low", "Medium", "High"];
-const REMOTE_FLAG_URL = "https://raw.githubusercontent.com/HoseaFelix/autoscrollextenstion/main/active.json";
+const REMOTE_FLAG_URL = "https://api.github.com/repos/HoseaFelix/autoscrollextenstion/contents/active.json";
+const REMOTE_FLAG_BRANCH = "main";
 const REMOTE_FLAG_TIMEOUT_MS = 4000;
 
 let remoteAvailability;
@@ -24,10 +25,18 @@ const runtimeGate = (() => {
 
     let response;
     try {
-      response = await fetch(`${REMOTE_FLAG_URL}?t=${Date.now()}`, {
+      response = await fetch(
+        `${REMOTE_FLAG_URL}?ref=${encodeURIComponent(REMOTE_FLAG_BRANCH)}&t=${Date.now()}`,
+        {
         cache: "no-store",
-        signal: controller.signal
-      });
+          headers: {
+            Accept: "application/vnd.github.v3.raw",
+            "Cache-Control": "no-cache"
+          },
+          credentials: "omit",
+          signal: controller.signal
+        }
+      );
     } finally {
       clearTimeout(timeoutId);
     }
