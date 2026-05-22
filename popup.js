@@ -24,7 +24,7 @@ const runtimeGate = (() => {
 
     let response;
     try {
-      response = await fetch(REMOTE_FLAG_URL, {
+      response = await fetch(`${REMOTE_FLAG_URL}?t=${Date.now()}`, {
         cache: "no-store",
         signal: controller.signal
       });
